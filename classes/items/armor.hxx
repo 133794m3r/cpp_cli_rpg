@@ -16,8 +16,18 @@ class Armor:public Item {
 	unsigned short defense_;
   public:
 	explicit Armor(std::string name="Armor", unsigned short level=1, unsigned short tier=1):Item(std::move(name),level,tier,2){
-		this->defense_ = std::lround((level*1.95*(1+((tier-1.00)/4.00))));
+		double modifier;
+		level += (tier-1);
+		if(tier == 0)
+			modifier = 0.85;
+		else if(tier == 1)
+			modifier = 1.05;
+		else
+			modifier = 1.00 + (tier-1.00)/5.00;
+
+		this->defense_ = std::lround((level * 1.55 * modifier) + (tier/3.00))+1;
 	}
+
 	unsigned short get_defense() const{
 		return this->defense_;
 	}

@@ -15,7 +15,7 @@ if(MSVC)
 else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O2")
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -O2 -g3 ")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -O0 -g3 ")
 	#since CLion decides that you debug from the damn release buildl always instead of from debug and won't let you change that.
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
 
@@ -222,8 +222,8 @@ add_executable(dangling_pointers
 #have to make sure this works on windows first.
 if(MSVC)
 	#Test the battle system
-	add_test(NAME "Battle_Module"
-			COMMAND test_battle.exe)
+#	add_test(NAME "Battle_Module"
+#			COMMAND test_battle.exe)
 	#Test the Actor class and children classes.
 	add_test(NAME "Actor_Module"
 			COMMAND test_fighters.exe)
@@ -246,8 +246,8 @@ if(MSVC)
 
 else()
 	#Test the battle system
-	add_test(NAME "Battle_Module"
-			COMMAND ./test_battle)
+#	add_test(NAME "Battle_Module"
+#			COMMAND ./test_battle)
 	#Test the Actor class and children classes.
 	add_test(NAME "Actor_Module"
 			COMMAND ./test_fighters)

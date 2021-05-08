@@ -40,9 +40,9 @@ int main(){
 	else
 		std::cout << "Player creation test Passed\n";
 	//and mob
-	if( "id: 2 Spawn of Death hp:16/16 str:8/8 def:3/3 xp:7 g:5 tier: 1 / normal" != (std::string) tmp_mob){
+	if( "id: 2 Spawn of Death hp:33/33 str:11/11 def:6/6 xp:7 g:5 tier: 1 / normal" != (std::string) tmp_mob){
 		std::cout << "mob creation test failed \n";
-		std::cout << "Expected 'id: 2 Spawn of Death hp:16/16 str:8/8 def:3/3 xp:7 g:5 tier: 1 / normal' but we got '";
+		std::cout << "Expected 'id: 2 Spawn of Death hp:33/33 str:11/11 def:6/6 xp:7 g:5 tier: 1 / normal' but we got '";
 		std::cout << (std::string) tmp_mob << '\n';
 		tests_failed++;
 	}
@@ -62,7 +62,11 @@ int main(){
 
 	//attack the base object.
 	tmp_player.attack(tmp_mob);
-	unsigned int expected_hp = tmp_mob_hp - (tmp_player.get_str() - tmp_mob.get_def());
+	unsigned int expected_hp;
+	if(tmp_player.get_str() < tmp_mob.get_def())
+		expected_hp = tmp_mob_hp;
+	else
+		expected_hp = tmp_mob_hp - (tmp_player.get_str() - tmp_mob.get_def());
 	std::cout << "Actor targeting mob test ";
 	if(tmp_mob.get_hp() != expected_hp ){
 		std::cout << "failed. Mob HP wrong expected " << expected_hp << " but got " << tmp_mob.get_hp() <<'\n';
@@ -86,8 +90,8 @@ int main(){
 	//test the tiers and scaling.
 	Mob boss("Bossman",6,5);
 	std::cout << "Boss creation/scaling/tier test ";
-	if((std::string) boss != "id: 3 Bossman hp:115/115 str:42/42 def:24/24 xp:192 g:178 tier: 6 / boss"){
-		std::cout << "failed. Expected 'id: 3 Bossman hp:115/115 str:42/42 def:24/24 xp:192 g:178 tier: 6 / boss' but we got '" << (std::string) boss << "'\n";
+	if((std::string) boss != "id: 3 Bossman hp:333/333 str:70/70 def:39/39 xp:192 g:178 tier: 6 / boss"){
+		std::cout << "failed. Expected 'id: 3 Bossman hp:333/333 str:70/70 def:39/39 xp:192 g:178 tier: 6 / boss' but we got '" << (std::string) boss << "'\n";
 		tests_failed++;
 	}
 	else
@@ -95,8 +99,8 @@ int main(){
 
 	std::cout << "Junk Mob creation test\n";
 	Mob junk_mob("Junk",0);
-	if((std::string) junk_mob != "id: 4 Junk hp:13/13 str:5/5 def:2/2 xp:4 g:2 tier: 0 / trash"){
-		std::cout << "Test failed: Expected 'id: 4 Junk hp:13/13 str:5/5 def:2/2 xp:4 g:2 tier: 0 / trash' but we got " << (std::string) junk_mob << '\n';
+	if((std::string) junk_mob != "id: 4 Junk hp:28/28 str:10/10 def:5/5 xp:4 g:2 tier: 0 / trash"){
+		std::cout << "Test failed: Expected 'id: 4 Junk hp:13/13 str:5/5 def:2/2 xp:4 g:2 tier: 0 / trash' but we got '" << (std::string) junk_mob << "'\n";
 		tests_failed++;
 	}
 	std::cout << "Passed " << 7 - tests_failed << "/7" << std::endl;

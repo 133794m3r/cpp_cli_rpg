@@ -14,9 +14,22 @@ class Weapon:public Item {
 	unsigned short damage_;
   public:
 	explicit Weapon(std::string name="Weapon",unsigned short level=1, unsigned short tier=1):Item(std::move(name), level, tier,1){
-		this->damage_ = std::lround((level*1.5*(1+((tier-1.00)/4.00))));
+		double modifier=0;
+		double add_str = 1.50;
+		double dif = level;
+		if(tier == 0)
+			modifier = 0.95;
+		else if(tier == 1){
+			modifier = 1.00;
+			dif = level+0.50;
+		}
+		else{
+			modifier = 1.00 + (tier-1.00)/4.00;
+			add_str = 1.00 + (tier+1)/5.0;
+			dif += ((tier-1.0)/2.0);
+		}
+		this->damage_ = std::lround( (dif*1.45 * modifier) + add_str)+1	;
 	}
-
 
 	unsigned short get_damage() const{
 		return this->damage_;

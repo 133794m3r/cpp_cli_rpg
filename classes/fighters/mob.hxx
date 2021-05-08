@@ -84,9 +84,9 @@ class Mob : public Actor {
 
 	//initialize the Mob class. Explicit since it can be called with just 1 parameter. Also initialize properties with parent class' constructor.
 	explicit Mob(std::string name="Mob",unsigned short tier=1, unsigned short level=1,
-			  double bonus_hp=0.00, double bonus_str=0.0, double bonus_def=0.0)
-			  :Actor(std::move(name),level,bonus_hp+((tier-1.0)/20.00),
-			bonus_str+((tier-1.0)/100.00),bonus_def+((tier-1.0)/80.00),16,6,3,1) {
+			  double bonus_hp=0.125, double bonus_str=0.25, double bonus_def=0.125)
+			  :Actor(std::move(name),level,bonus_hp,
+			bonus_str,bonus_def,16,6,3,1) {
 		unsigned int tmp = this->lvl_ + 1;
 		//based on other formulas this should make the curve OK.
 		//tier will modify the two formulas below eventually
@@ -94,23 +94,41 @@ class Mob : public Actor {
 		this->gold_ = 0;
 		this->set_gold();
 		this->tier_ = tier;
+		double tier_scale = 0.35;
+		double modifier = 1.00;
+		double dif = level;
+		if(level<10)
+			tier_scale = 0.00;
+		else if(level<20)
+			tier_scale=0.125;
+		else if(level<40)
+			tier_scale=0.25;
+		else if(level<60)
+			tier_scale = 0.30;
 
-		//since C++ bitches about calling a virtual function from constructor recopy the code here.
-		double modifier =  (1 + ( (this->tier_<5)?(this->tier_-1)/29.0:(this->tier_-1)/27.0 ));
-		double dif;
-		//if it's the same just do nothing.
-		if(level == this->lvl_)
-			dif = this->lvl_ - 1;
-		else if(level > this->lvl_)
-			dif = level - this->lvl_;
-		else
-			dif = this->lvl_ - level;
-		dif += (this->tier_-1.00)/6.00;
-		//when they modify the level change the stats to the proper values.
-		double tmp__ = (this->bonus_str_+1.0)*4.0*modifier*dif;
-		this->base_hp_ += std::lround( (this->bonus_hp_+1.0)*13.1*modifier*dif+(this->tier_-1.00));
-		this->base_str_ += std::lround( ((this->bonus_str_+1.0)*4.0*modifier*dif)+((this->tier_-1)/3));
-		this->base_def_ += std::lround( ((this->bonus_def_+1.0)*3.125*modifier*dif)+((this->tier_-1.00)/3.00));
+		if(tier == 0) {
+			modifier += -0.038461538461538464;
+			dif -= 0.25;
+		}
+		else if(tier == 1){
+			modifier =1.00;
+		}
+		else{
+			dif += (tier/1.50);
+			this->bonus_hp_ += (tier*1.25)/10.00;
+			this->bonus_str_ += (tier*1.01)/30.0;
+			this->bonus_def_ += (tier*1.25)/40.0;
+			if(tier<5){
+				modifier += (tier-tier_scale)/26.25;
+			}
+			else{
+				modifier += (tier-tier_scale)/25.9;
+			}
+		}
+
+		this->base_hp_ += std::lround( (this->bonus_hp_+1)*15*modifier*dif + (tier-0.5));
+		this->base_str_ += std::lround( (this->bonus_str_+1) * 3.95 * modifier * dif );
+		this->base_def_ += std::lround( (this->bonus_def_+1) * 2.50 * modifier * dif);
 		//then set the current stats from the base.
 		this->hp_ = this->base_hp_;
 		this->str_ = this->base_str_;

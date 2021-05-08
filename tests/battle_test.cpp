@@ -15,6 +15,6 @@ int main(){
 	Mob mob("Fish");
 	Mob Boss("Giant",6,2);
 	Player player("Jimmy");
-	battle(player,mob);
+//	battle(player,mob);
 	return 0;
 }

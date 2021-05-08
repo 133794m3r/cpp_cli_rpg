@@ -49,7 +49,7 @@ void clear_lines(unsigned short start_line, unsigned short lines){
 #else
 	//all other devices I have use to the crappy getchar() version but it works.
 	int pause(){
-		char tmp[2];
+//		char tmp[2];
 		//clear the rest of cin.
 		std::cout << "press enter/return key to continue... ";
 		std::cin.sync();
