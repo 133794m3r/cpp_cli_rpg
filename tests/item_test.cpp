@@ -27,7 +27,7 @@ int main() {
 		std::cout << "failed: Expected 0 but we got " << junk.get_id();
 		failed++;
 	}
-
+	std::cout << '\n';
 	std::cout << "Item Value Tests\n";
 	std::cout << "Junk Test: ";
 	total++;
@@ -68,10 +68,10 @@ int main() {
 
 	total++;
 	std::cout << "Epic Weapon Damage: ";
-	if(epic_weapon.get_damage() == 15)
+	if(epic_weapon.get_damage() == 3)
 		std::cout << "passed!\n";
 	else {
-		std::cout << "failed! Expected: 13 but we got " << epic_weapon.get_damage() << "\n";
+		std::cout << "failed! Expected: 3 but we got " << epic_weapon.get_damage() << "\n";
 		failed++;
 	}
 

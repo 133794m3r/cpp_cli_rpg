@@ -18,7 +18,7 @@ class Actor {
 	static unsigned short next_id_;
   //these properties need to be accessible by child classes.
   protected:
-	const unsigned short type;
+//	const unsigned short type;
 	//it would be best to make this const since it'll never be modified but it's too complex for me to get up and working.
 	unsigned short id;
 	std::string name_;
@@ -31,9 +31,9 @@ class Actor {
 	unsigned int base_str_;
 	unsigned int base_def_;
 	//then we store the actual values. Since they may be debuffed or if they're damaged. This way we can have stats reset.
-	unsigned int hp_{};
-	unsigned int str_{};
-	unsigned int def_{};
+	unsigned int hp_;
+	unsigned int str_;
+	unsigned int def_;
 	//level can never be <0 so unsigned value.
 	unsigned short lvl_ = 0;
 
@@ -46,7 +46,7 @@ class Actor {
 	explicit Actor(std::string name="Actor", unsigned short level=1, double bonus_hp = 0.0,
 				double bonus_str = 0.0, double bonus_def = 0.0,unsigned int hp = 15,
 				unsigned int str = 5, unsigned int def = 3,unsigned short type=0)
-				:type(type),id(next_id_++){
+				:id(next_id_++){
 		//set all properties.
 		//we're copying once so why not just move it.
 		this->name_ = std::move(name);
@@ -181,7 +181,7 @@ class Actor {
 	 * @return int the amount of damage carried out.
 	 */
 	unsigned int attack(Actor &target) const{
-		return target.damage(this->base_str_);
+		return target.damage(this->str_);
 	}
 
 	/**

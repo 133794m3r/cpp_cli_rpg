@@ -36,9 +36,10 @@ class Player: public Actor {
 	 * @param gold
 	 */
 	explicit Player(std::string name="Player", unsigned short level=1,double bonus_hp=0.05,
-				 double bonus_str=0.05, double bonus_def=0.05,unsigned int xp=0, unsigned int gold = 100,unsigned short current_level=0)
-				 :Actor(std::move(name),level,bonus_hp, bonus_str,bonus_def,20,
+				 double bonus_str=0.05, double bonus_def=0.0125,unsigned int xp=0, unsigned int gold = 100,unsigned short current_level=0)
+				 :Actor(std::move(name),level,bonus_hp, bonus_str,bonus_def,25,
 			5,4,255){
+		//TODO: Was scaling incorrectly by a whole level.
 		//player will always have a set id that's way higher than the rest of the objects in the world.
 		this->id = 65535;
 		this->gold_ = gold;
@@ -61,10 +62,10 @@ class Player: public Actor {
 		else
 			dif = this->lvl_ - level;
 		//when they modify the level change the stats to the proper values.
-		this->base_hp_ += std::lround( (this->bonus_hp_+1.05)*13.0*dif);
+		this->base_hp_ += std::lround( (this->bonus_hp_+1.05)*14.5*dif);
 		this->base_str_ += std::lround( (this->bonus_str_+1.05)*4.0*dif);
 		//increase hardiness against mobs
-		this->base_def_ += std::lround( (this->bonus_def_+1.05)*3.25*dif);
+		this->base_def_ += std::lround( (this->bonus_def_+1.00)*2.5*dif);
 		//then set the current stats from the base.
 		this->hp_ = this->base_hp_;
 		this->str_ = this->base_str_;

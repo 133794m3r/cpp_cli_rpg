@@ -22,26 +22,21 @@ class Mob : public Actor {
 	//the xp to be awarded and gold be awarded upon death.
 	unsigned int xp_;
 	unsigned int gold_;
-	//the tier strings
-	const static std::string tier_str[7];
+	//the tier strings a total of 6 tiers exist.
+	const static std::string tier_str[6];
 
 	/*
 	 * type is based upon the following list.
-	 * 0 = trash-tier, 1 = normal, 2 = rare, 3 = elite, 4 = rare elite, 5 = mini-boss, 6 = boss
+	 * 0 = trash-tier, 1 = normal, 2 = rare, 3 = elite, 4 = mini-boss, 5 = boss
 	 * they get a bonus to all stats based upon their tier(or reduced for trash).
 	 * The stat bonus makes it as if they are of a higher level than they really are like so.
-	 * Bosses use their own rules and thus don't use the normal formula below but instead start as "boss" number.
-	 * stats = set_stats(this->lvl_+ (TIER - 1))
-	 * plus the bonuses when creating the mob are modified to gain (TIER-1)*0.1.
-	 * So the bonus_hp_ value would be increased by 1.2 for an elite mob. For a trash mob their
-	 * stats would all be reduced by 10%. Plus their level would be one less than the
-	 * currently set one.
+	 * Bosses use get way more bonuses than everyone else and hence are harder than the rest.
 	 */
 
 	//a short to make C++ not try to make it be a string when doing stream operations.
 	unsigned short tier_;
 	//loot table
-	LootTable loot_table;
+	LootTable loot_table_;
 
 	/**
 	 * Sets the amount of gold that this mob should reward upon it's death.
@@ -88,47 +83,55 @@ class Mob : public Actor {
 			  :Actor(std::move(name),level,bonus_hp,
 			bonus_str,bonus_def,16,6,3,1) {
 		unsigned int tmp = this->lvl_ + 1;
+
+		//don't allow them to have a tier higher than we actually have support for.
+		this->tier_ = (tier>5)?5:tier;
+		this->xp_ = std::lround((tmp * (tmp * 0.79) *(1+ (tier - 1.00 / 3.25) ))+ 2.00);
 		//based on other formulas this should make the curve OK.
 		//tier will modify the two formulas below eventually
-		this->xp_ = std::lround((tmp * (tmp * 0.79) *(1+ (tier - 1.00 / 3.25))+ 2.00));
-		this->gold_ = 0;
 		this->set_gold();
-		this->tier_ = tier;
-		double tier_scale = 0.35;
-		double modifier = 1.00;
-		double dif = level;
-		if(level<10)
-			tier_scale = 0.00;
-		else if(level<20)
-			tier_scale=0.125;
-		else if(level<40)
-			tier_scale=0.25;
-		else if(level<60)
-			tier_scale = 0.30;
-
-		if(tier == 0) {
-			modifier += -0.038461538461538464;
-			dif -= 0.25;
-		}
-		else if(tier == 1){
-			modifier =1.00;
-		}
-		else{
-			dif += (tier/1.50);
-			this->bonus_hp_ += (tier*1.25)/10.00;
-			this->bonus_str_ += (tier*1.01)/30.0;
-			this->bonus_def_ += (tier*1.25)/40.0;
-			if(tier<5){
-				modifier += (tier-tier_scale)/26.25;
-			}
-			else{
-				modifier += (tier-tier_scale)/25.9;
-			}
+		if(tier > 1){
+			this->bonus_hp_ += ((tier*1.25)/7);
+			this->bonus_str_ += (tier/95);
+			this->bonus_def_ += ((tier*1.25)/45);
 		}
 
-		this->base_hp_ += std::lround( (this->bonus_hp_+1)*15*modifier*dif + (tier-0.5));
-		this->base_str_ += std::lround( (this->bonus_str_+1) * 3.95 * modifier * dif );
-		this->base_def_ += std::lround( (this->bonus_def_+1) * 2.50 * modifier * dif);
+		if(level > 0) {
+			double tier_scale;
+			double modifier = 1.00;
+			double dif = level;
+			if(level < 5)
+				tier_scale = -0.75;
+			else if (level < 10)
+				tier_scale = 0.20;
+			else if (level < 20)
+				tier_scale = 0.25;
+			else if (level < 40)
+				tier_scale = 0.30;
+			else if (level < 60)
+				tier_scale = 0.35;
+			else
+				tier_scale = 0.40;
+
+			if (tier == 0) {
+				modifier += (-1/27.75);
+				dif -= 0.25;
+			}
+			else if(tier > 1){
+
+				dif += (tier / 1.50);
+				if (tier < 5) {
+					modifier += (tier - tier_scale) / 28.25;
+				}
+				else {
+					modifier += (tier - tier_scale) / 27.85;
+				}
+			}
+
+			this->base_hp_ += std::lround((this->bonus_hp_ + 1) * 15 * modifier * dif + (tier - 0.5));
+			this->base_str_ += std::lround((this->bonus_str_ + 1) * 3.95 * modifier * dif);
+			this->base_def_ += std::lround((this->bonus_def_ + 1) * 2.50 * modifier * dif);
+		}
 		//then set the current stats from the base.
 		this->hp_ = this->base_hp_;
 		this->str_ = this->base_str_;
@@ -141,7 +144,7 @@ class Mob : public Actor {
 	 * @param level The level that we're going to be basing scaling on.
 	 */
 	void set_level(unsigned short level) override{
-		double modifier =  (1 + ( (this->tier_<5)?(this->tier_-1)/29.0:(this->tier_-1)/27.0 ));
+		//TODO: Decide if I'm going to store the base stats from creation and just recalculate the new stats after setting level. Which would make this whole thing a lot easier.
 		double dif;
 		//if it's the same just do nothing.
 		if(level == this->lvl_)
@@ -150,11 +153,46 @@ class Mob : public Actor {
 			dif = level - this->lvl_;
 		else
 			dif = this->lvl_ - level;
-		dif += (this->tier_-1.00)/6.00;
-		//when they modify the level change the stats to the proper values.
-		this->base_hp_ += std::lround( (this->bonus_hp_+1.0)*13.1*modifier*dif+(this->tier_-1.00));
-		this->base_str_ += std::lround( ((this->bonus_str_+1.0)*4.0*modifier*dif)+((this->tier_-1.00)*2.00));
-		this->base_def_ += std::lround( ((this->bonus_def_+1.0)*3.125*modifier*dif)+((this->tier_-1.00)/3.00));
+
+		double tier_scale;
+		double modifier = 1.00;
+		if(dif < 5)
+			tier_scale = -0.75;
+		else if (dif < 10)
+			tier_scale = 0.20;
+		else if (dif < 20)
+			tier_scale = 0.25;
+		else if (dif < 40)
+			tier_scale = 0.30;
+		else if (dif < 60)
+			tier_scale = 0.35;
+		else
+			tier_scale = 0.40;
+
+		if (this->tier_ == 0) {
+			modifier += (-1/27.75);
+			dif -= 0.25;
+		}
+		else if(this->tier_ > 1){
+			if(dif > 0)
+				dif += (this->tier_ / 1.50);
+			else
+				dif -= (this->tier_ / 1.50);
+			if (this->tier_ < 5) {
+				modifier += (this->tier_ - tier_scale) / 28.25;
+			}
+			else {
+				modifier += (this->tier_ - tier_scale) / 27.85;
+			}
+		}
+
+		this->base_hp_ += std::lround((this->bonus_hp_ + 1) * 15 * modifier * dif + (this->tier_ - 0.5));
+		this->base_str_ += std::lround((this->bonus_str_ + 1) * 3.95 * modifier * dif);
+		this->base_def_ += std::lround((this->bonus_def_ + 1) * 2.50 * modifier * dif);
+
+		dif = level+1.00;
+		this->xp_ = std::lround((dif * (dif * 0.79) *(1.00+ (this->tier_ - 1.00 / 3.25) )))+2;
+		this->set_gold();
 		//then set the current stats from the base.
 		this->hp_ = this->base_hp_;
 		this->str_ = this->base_str_;
@@ -178,8 +216,8 @@ class Mob : public Actor {
 		MobRewards rewards;
 		rewards.xp = this->xp_;
 		rewards.gold = this->gold_;
-		if(this->loot_table.inventory_quantity() != 0)
-			rewards.items = this->loot_table.award_items();
+		if(this->loot_table_.inventory_quantity() != 0)
+			rewards.items = this->loot_table_.award_items();
 		return rewards;
 	}
 
@@ -191,7 +229,7 @@ class Mob : public Actor {
 	 */
 	void add_items(std::vector<Item *> items, std::vector<unsigned char> quantity, std::vector<double> chances){
 		for(unsigned int i=0;i<chances.size();i++){
-			this->loot_table.add_item(*items[i], quantity[i],chances[i]);
+			this->loot_table_.add_item(*items[i], quantity[i], chances[i]);
 		}
 	}
 
@@ -202,7 +240,7 @@ class Mob : public Actor {
 	 * @param chance The chance of rewarding it
 	 */
 	void add_item(Item &item, unsigned char quantity=1, double chance = 1.0){
-		this->loot_table.add_item(item,quantity,chance);
+		this->loot_table_.add_item(item, quantity, chance);
 	}
 
 	/**
@@ -220,6 +258,6 @@ class Mob : public Actor {
 	}
 };
 //the tiers but in string form.
-const std::string Mob::tier_str[7] =  {"trash", "normal", "rare", "elite", "rare elite", "mini-boss", "boss"};
+const std::string Mob::tier_str[6] =  {"trash", "normal", "rare", "elite", "mini-boss", "boss"};
 
 #endif //CPP_CLI_RPG_MOB_HXX

@@ -53,12 +53,12 @@ class Menu {
 		clear_current_line();
 	}
   protected:
-	unsigned short menu_start;
-	unsigned short menu_lines;
+	unsigned short menu_start_;
+	unsigned short menu_lines_;
   public:
 	Menu(unsigned short start, unsigned short lines){
-		this->menu_start = start;
-		this->menu_lines = lines;
+		this->menu_start_ = start;
+		this->menu_lines_ = lines;
 	}
 	/**
  	* Static method to print the strings in the text-box.
@@ -67,7 +67,7 @@ class Menu {
 	 * @param message The message to be displayed.
 	 */
 	void show_menu_message(const std::string& message, const char delim_char=';') const {
-		_show_menu_message(message,this->menu_start, this->menu_lines,delim_char);
+		_show_menu_message(message, this->menu_start_, this->menu_lines_, delim_char);
 	}
 };
 

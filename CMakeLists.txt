@@ -27,6 +27,7 @@ else()
 endif()
 
 
+
 #the libraries
 
 #basic includes stuff
@@ -111,9 +112,7 @@ add_executable(test_battle
 add_executable(test_map
 		includes.hxx
 		classes/maps/room.hxx
-		classes/maps/room.cpp
 		classes/maps/map.hxx
-		classes/maps/map.cpp
 		tests/map_test.cpp
 		)
 

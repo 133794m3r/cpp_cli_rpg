@@ -10,42 +10,6 @@
 #define CPP_CLI_RPG_INPUTS_HXX
 #include "../includes.hxx"
 /**
- * Checks that hte user's input is a valid one within the options.
- *
- * @param min Lowest possible
- * @param max Highest possible
- * @param prefix Prefix message to show before player input.
- * @return The option that they chose.
- */
-unsigned int valid_option(unsigned int min=1,unsigned int max=1,const std::string&& prefix="Selection"){
-	unsigned int option;
-	//infinite loop is best way to enforce the options.
-	int res;
-	//this way it can be called with a single argument
-	if(max < min)
-		std::swap(min,max);
-	//infinite loop until it's good
-	while(true) {
-		res = proper_input(option,prefix);
-		//-1 means EOF was noticed
-		if(res == -1)
-			//so die
-			exit(1);
-		//if their option is valid
-		if(option >= min && option <= max)
-			break;
-		//otherwise tell them the valid range
-		std::cout << "Enter valid option from " << min << " to " << max << std::endl;
-		//make sure they know this
-		pause();
-		move_and_clear_up(2);
-		//show the prefix message
-		std::cout << "\x1b[1m" << prefix << "\x1b[22m: ";
-	}
-	return option;
-}
-
-/**
  * Quick and dirty text wrapper
  *
  * @param input The input string

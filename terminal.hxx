@@ -1,5 +1,5 @@
 /*
-* Basic Terminal Setup stuff.
+* Basic Terminal Setup stuff && Input Validation
 * By Macarthur Inbody <admin-contact@transcendental.us> 2020
 * Licensed AGPLv3
 */
@@ -43,20 +43,26 @@ void clear_lines(unsigned short start_line, unsigned short lines){
 			system("pause");
 			move_and_clear_up(1);
 		}
-		//complained that I wasn't capturing the output. So this is just here for that. Also WINBOOL isn't a type anymore. Still only going to be 1 byte of pointless space and 1 global.
+		//complained that I wasn't capturing the output. So this is just here 
+		// for that. Also WINBOOL isn't a type anymore. Still only going to be
+		// 1 byte of pointless space and 1 global.
 		bool __unused_test = SetConsoleMode(GetStdHandle(static_cast<DWORD>(-11)), 7);
 
 #else
-	//all other devices I have use to the crappy getchar() version but it works.
+	//all other devices I have use to the crappy get() version but it works.
 	int pause(){
-//		char tmp[2];
 		//clear the rest of cin.
 		std::cout << "press enter/return key to continue... ";
 		std::cin.sync();
+		//this wasn't needed
 //		std::cin.get(tmp,2,'\n');
+		//get a single character
 		std::cin.get();
-		std::cin.ignore(1);
+		//ignore the next one
+//		std::cin.ignore(1);
+		//clear it
 		std::cin.clear();
+		//move the terminal up a line.
 		move_and_clear_up(1);
 		return 0;
 	}
@@ -79,11 +85,13 @@ enum TEXT_COLORS{RESET_COLOR,
 	GRAY_BG = 100, BRIGHT_RED_BG, BRIGHT_GREEN_BG, BRIGHT_YELLOW_BG, BRIGHT_BLUE_BG, BRIGHT_MAGENTA_BG, BRIGHT_CYAN_BG, BRIGHT_WHITE_BG
 };
 
+//move terminal cursor to the top of the screen and clear it
 void clear_and_move_top(){
 	printf("\x1b[1H\x1b[0J");
 }
 
-void move_cursor(unsigned int row, unsigned int column){
+//move the cursor to the specified row and column.
+void move_cursor(unsigned int row, unsigned int column=1){
 	printf("\x1b[%d;%dH",row,column);
 }
 
@@ -96,33 +104,87 @@ template <typename T> int proper_input(T &variable, std::string prefix){
 	* So if it can't convert the input into the type that's needed it'll fail
 	* thus it'll continue the loop.
 	*/
-//	while(!(std::cin >> variable)){
 	while(true){
+		//try to put it into the variable
 		std::cin >> variable;
+		//check that we didn't just get an EOF
 		if(std::cin.eof()){
+			//if we did construct a default type
 			variable = T();
+			//clear cin
 			std::cin.clear();
+			//return status of -1
 			return -1;
 		}
+		//if we had an error
 		else if(std::cin.fail()){
 			//tell them that the input is invalid.
 			std::cout << "You have entered invalid input please try again." << std::endl;
+			//make sure to clear the thing
 			std::cin.clear();
+			//ignore everything
 			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			//clear it again just in case
 			std::cin.clear();
+			//prompt them to press enter not using the pause function 
+			// since I can't rely on it to work here.
 			std::cout << "press enter/return key to continue... ";
+			//get a single character
 			std::getchar();
+			//clear the buffer
 			std::cin.clear();
+			//move the lines up
 			move_and_clear_up(3);
+			//show the message again
 			std::cout << "\x1b[1m" << prefix << "\x1b[22m: ";
 		}
 		else{
+			//we succeeded tim to leave it
 			break;
 		}
 	}
+	//ignore whatever else in the buffer.
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	//we finished it properly.
 	return 0;
 }
+
+/**
+ * Checks that hte user's input is a valid one within the options.
+ *
+ * @param min Lowest possible
+ * @param max Highest possible
+ * @param prefix Prefix message to show before player input.
+ * @return The option that they chose.
+ */
+unsigned int valid_option(unsigned int min=1,unsigned int max=1,const std::string&& prefix="Selection"){
+	unsigned int option;
+	//infinite loop is best way to enforce the options.
+	int res;
+	//this way it can be called with a single argument
+	if(max < min)
+		std::swap(min,max);
+	//infinite loop until it's good
+	while(true) {
+		res = proper_input(option,prefix);
+		//-1 means EOF was noticed
+		if(res == -1)
+			//so die
+			exit(1);
+		//if their option is valid
+		if(option >= min && option <= max)
+			break;
+		//otherwise tell them the valid range
+		std::cout << "Enter valid option from " << min << " to " << max << std::endl;
+		//make sure they know this
+		pause();
+		move_and_clear_up(2);
+		//show the prefix message
+		std::cout << "\x1b[1m" << prefix << "\x1b[22m: ";
+	}
+	return option;
+}
+
 #else
 //this'll be the C version of the function sometime in the future.
 #endif //__cplusplus

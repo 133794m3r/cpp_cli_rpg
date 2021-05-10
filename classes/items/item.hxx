@@ -19,11 +19,13 @@ class Item {
   protected:
 	std::string name_;
 	unsigned short value_;
+	//short b/c cout cats unsigned char to a char.
 	unsigned short tier_;
+	//same here. it's literally only going up to the number 8 but instead we waste an extra byte of ram.
 	unsigned short type_;
 	unsigned short level_;
   public:
-	explicit Item(std::string name = "Item", unsigned short level=1, unsigned short tier=1,unsigned short type=0):id_(next_id_++){
+	explicit Item(std::string name = "Item", unsigned short level=1, unsigned short tier=1,uint_fast8_t type=0):id_(next_id_++){
 		this->name_ = std::move(name);
 		this->tier_ = tier;
 		this->value_ = (level*6)+25+std::lround(level*((tier-1.00)/4.00));

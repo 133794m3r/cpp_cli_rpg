@@ -14,9 +14,9 @@ class TutorialMenu: public Menu {
 	//basic private properties
 	Player *player_;
 	//player's inventory
-	InventoryMenu *inv_menu;
+	InventoryMenu *inv_menu_;
 	//menu string
-	std::string menu_string;
+	std::string menu_string_;
 
 	//redraw the whole menu when returning from another menu/first entering this one.
 	void redraw_menu(){
@@ -37,8 +37,8 @@ class TutorialMenu: public Menu {
 	TutorialMenu(Player &player, InventoryMenu &inv):Menu(5,4){
 		//make sure they give us a player, their inventory.
 		this->player_ = &player;
-		this->menu_string = "";
-		this->inv_menu = &inv;
+		this->menu_string_ = "";
+		this->inv_menu_ = &inv;
 	};
 
 	//enter the tutorial
@@ -60,7 +60,7 @@ class TutorialMenu: public Menu {
 		std::cout << "Level: Tutorial " << this->player_->get_name() << "'s journey\n";
 		this->redraw_stats();
 		std::cout << "+------------------------------------------------------+\n|                                                      |\n|                                                      |\n+------------------------------------------------------+" << std::endl;
-		this->menu_string = "1)Enter Shop;2)Inventory Menu ;3)Continue On  ;4)Save Game    ;";
+		this->menu_string_ = "1)Enter Shop;2)Inventory Menu ;3)Continue On  ;4)Save Game    ;";
 		/*
 		 * 0 = hasn't bought anything. 1 = bought an item and has equipped it, 2 = fought the first rat,
 		 * 3 = second rat defeated , 4 = third rat defeated , 5 = shop to buy some potions, 6 = rate king area, 7 =  fought rat king
@@ -70,7 +70,7 @@ class TutorialMenu: public Menu {
 		//hard coded menu options here due to the player having to continue on.
 		while(true) {
 			//show menu
-			this->show_menu_message(this->menu_string);
+			this->show_menu_message(this->menu_string_);
 			std::cout << "\x1b[1mSelection\x1b[22m: ";
 			//prompt for result
 			unsigned int choice = valid_option(1, 4);
@@ -88,7 +88,7 @@ class TutorialMenu: public Menu {
 						tut_status++;
 						this->redraw_menu();
 						if(tut_status == 5){
-							this->menu_string = "1)Enter Shop;"+end_string;
+							this->menu_string_ = "1)Enter Shop;" + end_string;
 							print_wrap("You sense a dark presence before you. It seems extremely powerful. Now seems like a good time to stock up on some Potions.\n",55);
 							pause();
 							move_and_clear_up(2);
@@ -100,14 +100,14 @@ class TutorialMenu: public Menu {
 					}
 					break;
 				case 2:
-					inv_menu->enter();
+					inv_menu_->enter();
 					this->redraw_menu();
 					break;
 				case 3:
 					if(tut_status <= 1){
 						if (player_->equipped_armor() != nullptr || player_->equipped_armor() != nullptr) {
 							player_alive = battle(*this->player_, rat);
-							this->menu_string = "1)Explore the Darkness;"+end_string;
+							this->menu_string_ = "1)Explore the Darkness;" + end_string;
 							tut_status = 2;
 							clear_and_move_top();
 							this->redraw_menu();
@@ -118,11 +118,11 @@ class TutorialMenu: public Menu {
 						}
 					}
 					else if(tut_status == 4){
-						this->menu_string = "1)Enter Shop;" + end_string;
+						this->menu_string_ = "1)Enter Shop;" + end_string;
 						tut_status++;
 					}
 					else if(tut_status == 5){
-						this->menu_string = "1)Fight Giant Rat;" + end_string;
+						this->menu_string_ = "1)Fight Giant Rat;" + end_string;
 						tut_status++;
 					}
 					break;
